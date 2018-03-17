@@ -3,15 +3,15 @@ package data
 const (
 	ID         = "id"
 	AID        = "aid"
-	VIEW       = "view"
+	VIEW       = "_view"
 	DANMAKU    = "danmaku"
 	REPLY      = "reply"
 	FAVORITE   = "favorite"
 	COIN       = "coin"
-	SHARE      = "share"
+	SHARE      = "_share"
 	NOW_RANK   = "now_rank"
 	HIS_RANK   = "his_rank"
-	LIKE       = "like"
+	LIKE       = "_like"
 	NO_REPRINT = "no_reprint"
 	COPYRIGHT  = "copyright"
 )

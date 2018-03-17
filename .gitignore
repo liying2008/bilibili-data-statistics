@@ -1,5 +1,6 @@
-*.json
 *.db
 *.exe
 *.iml
 .idea/
+*.ipr
+*.iws

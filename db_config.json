@@ -1,0 +1,6 @@
+{
+  "use_mysql": false,
+  "database": "video_data",
+  "username": "root",
+  "password": "root"
+}

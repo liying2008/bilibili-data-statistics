@@ -1,10 +1,10 @@
-package sqlite
+package sqlite3
 
 import (
 	_ "github.com/mattn/go-sqlite3"
-	. "../../data"
+	. "../../../data"
 	"database/sql"
-	. "../error"
+	. "../../error"
 )
 
 // Initialize database
@@ -27,6 +27,7 @@ func InitDB() {
 		NO_REPRINT + " INTEGER DEFAULT -1," +
 		COPYRIGHT + " INTEGER DEFAULT -1" +
 		");")
+	defer stmt.Close()
 	CheckErr(err)
 	_, err = stmt.Exec()
 	CheckErr(err)
@@ -50,6 +51,7 @@ func InsertData(data *Data) int64 {
 		NO_REPRINT + ", " +
 		COPYRIGHT +
 		") VALUES(?,?,?,?,?,?,?,?,?,?,?,?)")
+	defer stmt.Close()
 	CheckErr(err)
 
 	res, err := stmt.Exec(data.Aid, data.View, data.Danmaku, data.Reply, data.Favorite,
@@ -64,8 +66,9 @@ func InsertData(data *Data) int64 {
 // Get all data
 func GetAllData() []Data {
 	db, err := sql.Open(DRIVER_NAME, DB_NAME)
-	// 查询数据
+	// query data
 	rows, err := db.Query("SELECT * FROM " + TB_VIDEO_DATA)
+	defer rows.Close()
 	CheckErr(err)
 
 	var allData = make([]Data, 0)
