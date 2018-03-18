@@ -47,9 +47,16 @@ func main() {
 		start, end = end, start
 	}
 
+	if !file.Exists(DB_CONFIG_FILE) {
+		fmt.Println(DB_CONFIG_FILE + " file does not exist. use sqlite3 database.")
+		// 使用 SQLite3 数据库
+		dataToSqlite3()
+		return
+	}
 	configData, err := ioutil.ReadFile(DB_CONFIG_FILE)
 	error.CheckErr(err)
 	dbConfig := ParseDBConfig(configData)
+	fmt.Println("use_mysql=" + strconv.FormatBool(dbConfig.UseMysql))
 
 	if dbConfig.UseMysql {
 		// 使用 MySQL 数据库
