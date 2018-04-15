@@ -43,7 +43,7 @@ func RenameTable(config *Config, newTableName string) {
 	stmt.Exec()
 }
 
-// Insert a data to sqlite3 database
+// Insert a data to mysql database
 func InsertData(config *Config, data *Data) int64 {
 	db, err := sql.Open(DRIVER_NAME, config.Username+":"+config.Password+"@/"+config.Database)
 	CheckErr(err)
@@ -68,6 +68,39 @@ func InsertData(config *Config, data *Data) int64 {
 		data.Coin, data.Share, data.NowRank, data.HisRank, data.Like, data.NoReprint, data.Copyright)
 	CheckErr(err)
 
+	id, err := res.LastInsertId()
+	CheckErr(err)
+	return id
+}
+
+// Insert data to mysql database
+func InsertGroupData(config *Config, datas []*Data) int64 {
+	db, err := sql.Open(DRIVER_NAME, config.Username+":"+config.Password+"@/"+config.Database)
+	CheckErr(err)
+	stmt, err := db.Prepare("INSERT INTO " + TB_VIDEO_DATA + " (" +
+		AID + ", " +
+		VIEW + ", " +
+		DANMAKU + ", " +
+		REPLY + ", " +
+		FAVORITE + ", " +
+		COIN + ", " +
+		SHARE + ", " +
+		NOW_RANK + ", " +
+		HIS_RANK + ", " +
+		LIKE + ", " +
+		NO_REPRINT + ", " +
+		COPYRIGHT +
+		") VALUES(?,?,?,?,?,?,?,?,?,?,?,?)")
+	defer stmt.Close()
+	CheckErr(err)
+	var res sql.Result
+	for _, data := range datas {
+		if data != nil {
+			res, err = stmt.Exec(data.Aid, data.View, data.Danmaku, data.Reply, data.Favorite,
+				data.Coin, data.Share, data.NowRank, data.HisRank, data.Like, data.NoReprint, data.Copyright)
+			CheckErr(err)
+		}
+	}
 	id, err := res.LastInsertId()
 	CheckErr(err)
 	return id

@@ -19,11 +19,9 @@ import (
 
 const (
 	URL_PREFIX     = "http://api.bilibili.com/archive_stat/stat?aid="
-	CONTENT_TYPE   = "application/json; charset=utf-8"
-	REFERER        = "https://www.bilibili.com/video/av11809669/?"
-	USER_AGENT     = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36"
 	CONNECTION     = "keep-alive"
 	DB_CONFIG_FILE = "db_config.json"
+	GROUP_COUNT    = 200
 )
 
 // 开始 aid
@@ -81,26 +79,22 @@ func dataToSqlite3() {
 		sqlite3.InitDB()
 	}
 
-	for i := start; i < end; i++ {
-		jsonStr := getVideoData(i)
-		if i%1000 == 0 {
-			time.Sleep(10 * time.Second)
-		} else if i%200 == 0 {
-			time.Sleep(2 * time.Second)
-		}
-		if jsonStr == "" {
-			fmt.Errorf("%s", "av"+strconv.FormatUint(i, 10)+": result is nil")
-			continue
-		}
-		video := data.ParseVideoData(jsonStr)
-		if video.Code == 0 {
-			// 获取信息成功
-			sqlite3.InsertData(video.Data)
-			fmt.Println("av" + strconv.FormatUint(video.Aid, 10) + " Success!")
+	var id int64
+	oldLastCount := start
+	lastCount := start
+	times := getGroupCount()
+	fmt.Println("times = " + strconv.FormatUint(times, 10))
+	for i := uint64(0); i < times; i++ {
+		oldLastCount = lastCount
+		if lastCount+GROUP_COUNT < end {
+			lastCount = lastCount + GROUP_COUNT
 		} else {
-			fmt.Println("failed to fetch av" + strconv.FormatUint(i, 10) + " data!")
-			//fmt.Println(jsonStr)
+			lastCount = end
 		}
+		groupData := getGroupData(oldLastCount, lastCount)
+		// 插入数据库
+		id = sqlite3.InsertGroupData(groupData)
+		fmt.Println("last insert id: " + strconv.FormatInt(id, 10))
 	}
 }
 
@@ -113,13 +107,39 @@ func dataToMysql(config *Config) {
 		mysql.InitDB(config)
 	}
 
-	for i := start; i < end; i++ {
-		jsonStr := getVideoData(i)
-		if i%1000 == 0 {
-			time.Sleep(10 * time.Second)
-		} else if i%200 == 0 {
-			time.Sleep(2 * time.Second)
+	var id int64
+	oldLastCount := start
+	lastCount := start
+	times := getGroupCount()
+	fmt.Println("times = " + strconv.FormatUint(times, 10))
+	for i := uint64(0); i < times; i++ {
+		oldLastCount = lastCount
+		if lastCount+GROUP_COUNT < end {
+			lastCount = lastCount + GROUP_COUNT
+		} else {
+			lastCount = end
 		}
+		groupData := getGroupData(oldLastCount, lastCount)
+		// 插入数据库
+		id = mysql.InsertGroupData(config, groupData)
+		fmt.Println("last insert id: " + strconv.FormatInt(id, 10))
+	}
+}
+
+// 得到分组个数，决定了集中写数据库的次数
+func getGroupCount() (times uint64) {
+	if (end-start+1)%GROUP_COUNT == 0 {
+		times = (end - start + 1) / GROUP_COUNT
+	} else {
+		times = (end-start+1)/GROUP_COUNT + 1
+	}
+	return times
+}
+
+func getGroupData(s uint64, e uint64) []*data.Data {
+	groupData := make([]*data.Data, e-s+1)
+	for i := s; i < e; i++ {
+		jsonStr := getVideoData(i)
 		if jsonStr == "" {
 			fmt.Errorf("%s", "av"+strconv.FormatUint(i, 10)+": result is nil")
 			continue
@@ -127,13 +147,14 @@ func dataToMysql(config *Config) {
 		video := data.ParseVideoData(jsonStr)
 		if video.Code == 0 {
 			// 获取信息成功
-			mysql.InsertData(config, video.Data)
+			groupData[i-s] = video.Data
 			fmt.Println("av" + strconv.FormatUint(video.Aid, 10) + " Success!")
 		} else {
 			fmt.Println("failed to fetch av" + strconv.FormatUint(i, 10) + " data!")
 			//fmt.Println(jsonStr)
 		}
 	}
+	return groupData
 }
 
 func getVideoData(aid uint64) (data string) {
@@ -143,12 +164,6 @@ func getVideoData(aid uint64) (data string) {
 	url := URL_PREFIX + strconv.FormatUint(aid, 10)
 	req, err := http.NewRequest("GET", url, nil)
 	error.CheckErr(err)
-
-	//req.Header.Set("Content-Type", CONTENT_TYPE)
-	//req.Header.Set("Referer", REFERER)
-	//req.Header.Set("User-Agent", USER_AGENT)
-	//req.Header.Set("Connection", CONNECTION)
-
 	resp, err := client.Do(req)
 
 	if err != nil || resp == nil {
