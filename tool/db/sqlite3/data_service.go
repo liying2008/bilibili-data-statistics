@@ -1,10 +1,10 @@
 package sqlite3
 
 import (
-	_ "github.com/mattn/go-sqlite3"
-	. "../../../data"
 	"database/sql"
-	. "../../error"
+	. "github.com/bilibili-data-statistics/data"
+	. "github.com/bilibili-data-statistics/tool/error"
+	_ "github.com/mattn/go-sqlite3"
 )
 
 // Initialize database

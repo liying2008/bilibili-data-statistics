@@ -2,9 +2,9 @@ package mysql
 
 import (
 	"database/sql"
-	. "../config"
-	. "../../error"
-	. "../../../data"
+	. "github.com/bilibili-data-statistics/data"
+	. "github.com/bilibili-data-statistics/tool/db/config"
+	. "github.com/bilibili-data-statistics/tool/error"
 	_ "github.com/go-sql-driver/mysql"
 )
 

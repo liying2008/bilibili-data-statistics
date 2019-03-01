@@ -1,20 +1,20 @@
 package main
 
 import (
-	"net/http"
-	"io/ioutil"
-	"strconv"
-	"fmt"
-	"./tool/error"
-	"./tool/db/sqlite3"
-	"./tool/db/mysql"
-	"./tool/file"
-	"./data"
 	"flag"
-	"time"
+	"fmt"
+	"github.com/bilibili-data-statistics/data"
+	. "github.com/bilibili-data-statistics/tool/db/config"
+	"github.com/bilibili-data-statistics/tool/db/mysql"
+	"github.com/bilibili-data-statistics/tool/db/sqlite3"
+	"github.com/bilibili-data-statistics/tool/error"
+	"github.com/bilibili-data-statistics/tool/file"
+	"io/ioutil"
+	"net/http"
 	"os"
+	"strconv"
 	"strings"
-	. "./tool/db/config"
+	"time"
 )
 
 const (
