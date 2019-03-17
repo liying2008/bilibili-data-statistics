@@ -1,10 +1,13 @@
 # bilibili 视频数据采集
 
+**此项目仅用于学习交流，请勿用作他途。**
+
 ## 编译执行
 
 采集的数据可以存储到 **SQLite3** 数据库 或 **MySQL** 数据库，取决于 `db_config.json` 文件中的配置： 
  
-`db_config.json`   
+`db_config.json`
+
 ```json
 {
   "use_mysql": true,
@@ -13,20 +16,21 @@
   "password": "root"
 }
 ```
+
 `use_mysql` 置为 `true` 则使用 **MySQL** 数据库，置为 `false` 则使用 **SQLite3** 数据库。其余 `database` 、 `username` 和 `password` 三项配置只针对 **MySQL** 数据库，如果使用 **MySQL** 数据库，请填写正确的配置。 
 
 ### 1. 下载依赖库  
 
-使用 **SQLite3** 数据库 需要依赖 `github.com/mattn/go-sqlite3` ：
-- 下载方法：
+需要提前安装 `dep` 工具（已安装的可忽略），下载安装命令：
+
 ```shell
-go get github.com/mattn/go-sqlite3
+go get -u github.com/golang/dep/cmd/dep
 ```
 
-使用 **MySQL** 数据库 需要依赖 `github.com/go-sql-driver/mysql` ：
-- 下载方法：
+安装依赖库：
+
 ```shell
-go get github.com/go-sql-driver/mysql
+dep ensure
 ```
 
 ### 2. 编译（在当前目录下执行命令）：  
@@ -38,11 +42,13 @@ go build
 ### 3. 运行：
 
 - Windows:
+
 ```shell
 bilibili-data-statistics.exe --start={start aid} --end={end aid} --samedb={true/false}
 ```
 
 - Linux:
+
 ```shell
 ./bilibili-data-statistics --start={start aid} --end={end aid} --samedb={true/false}
 ```
